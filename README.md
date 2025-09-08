@@ -1,6 +1,6 @@
 # wl-voice
 
-A voice recording and transcription tool for Hyprland, using Whisper for speech-to-text and copying results to clipboard.
+A voice recording and transcription tool for Hyprland, using Whisper for speech-to-text and copying results to clipboard. It's using Faster Whisper (optimized for CPU) and runs **fully locally**. 
 
 ## Installation
 

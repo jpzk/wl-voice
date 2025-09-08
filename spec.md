@@ -1,5 +1,15 @@
 # wl-voice
 
+## Why this tool?
+
+1. ydotool doesn't work reliably 
+2. hyprctl dispatch doesn't work reliably
+
+## Use cases
+
+1. Works within any application in Wayland
+2. Faster Whisper is optimized for CPU, so works even without fancy GPU
+
 ## Stack
 
 1. Rust project
@@ -16,8 +26,8 @@
 
 the output are two binaries:
 
-- wl-voiced (daemon process that runs faster whispher and waits for commands from the cli tool wl-voice).
-- wl-voice (cli tool that is called by window manager, such as hyprland)
+1. wl-voiced (daemon process that runs faster whispher and waits for commands from the cli tool wl-voice).
+2. wl-voice (cli tool that is called by window manager, such as hyprland)
 
 ## Installation 
 

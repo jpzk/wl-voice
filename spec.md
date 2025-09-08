@@ -4,15 +4,17 @@
 
 1. ydotool doesn't work reliably 
 2. hyprctl dispatch doesn't work reliably
+3. I spent a couple of hours finding the best way with AI and fell back on wl-copy
 
 ## Use cases
 
 1. Works within any application in Wayland
 2. Faster Whisper is optimized for CPU, so works even without fancy GPU
+3. Super easy install 'make install'
 
 ## Stack
 
-1. Rust project
+1. Python (faster whisper implemented in Python) 
 2. Faster whisper
 3. Daemon (keeps the STT mode warms) & CLI combo (called via WM hotkey) 
 

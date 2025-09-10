@@ -1,0 +1,97 @@
+name: Test AUR Package
+
+on:
+  push:
+    branches: [ main, master, aur ]
+    paths:
+      - 'PKGBUILD'
+      - '.SRCINFO'
+      - 'requirements.txt'
+      - '*.py'
+      - '.github/workflows/test-aur.yml'
+  pull_request:
+    branches: [ main, master, aur ]
+    paths:
+      - 'PKGBUILD'
+      - '.SRCINFO'
+      - 'requirements.txt'
+      - '*.py'
+      - '.github/workflows/test-aur.yml'
+  workflow_dispatch:
+
+jobs:
+  test-aur-package:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update system and install dependencies
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm base-devel git python python-pip sudo
+
+      - name: Create build user
+        run: |
+          useradd -m -G wheel builduser
+          echo 'builduser ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+          chown -R builduser:builduser $GITHUB_WORKSPACE
+
+      - name: Validate PKGBUILD syntax
+        run: |
+          cd $GITHUB_WORKSPACE
+          sudo -u builduser bash -c "source PKGBUILD && echo 'PKGBUILD syntax OK'"
+          sudo -u builduser bash -c "source PKGBUILD && echo 'Package: $pkgname v$pkgver-$pkgrel'"
+
+      - name: Install build dependencies
+        run: |
+          pacman -S --needed --noconfirm portaudio
+
+      - name: Build package
+        run: |
+          cd $GITHUB_WORKSPACE
+          sudo -u builduser makepkg --syncdeps --noconfirm --clean
+
+      - name: Validate package contents
+        run: |
+          cd $GITHUB_WORKSPACE
+          PKG_FILE=$(ls *.pkg.tar.* | head -n1)
+          echo "Built package: $PKG_FILE"
+          
+          echo "=== Package Information ==="
+          pacman -Qip "$PKG_FILE"
+          
+          echo "=== Package Contents ==="
+          pacman -Qlp "$PKG_FILE"
+          
+          echo "=== Checking for required binaries ==="
+          if pacman -Qlp "$PKG_FILE" | grep -q "usr/bin/wl-voice"; then
+            echo "✅ wl-voice binary found"
+          else
+            echo "❌ wl-voice binary missing"
+            exit 1
+          fi
+          
+          if pacman -Qlp "$PKG_FILE" | grep -q "usr/bin/wl-voiced"; then
+            echo "✅ wl-voiced binary found"
+          else
+            echo "❌ wl-voiced binary missing"
+            exit 1
+          fi
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wl-voice-package
+          path: '*.pkg.tar.*'
+          retention-days: 7
+
+      - name: Test installation (dry run)
+        run: |
+          cd $GITHUB_WORKSPACE
+          PKG_FILE=$(ls *.pkg.tar.* | head -n1)
+          echo "Testing package installation (dry run)..."
+          pacman -U --print "$PKG_FILE"

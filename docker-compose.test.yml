@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  arch-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    volumes:
+      - .:/workspace
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    environment:
+      - DISPLAY=${DISPLAY}
+    working_dir: /workspace
+    tty: true
+    stdin_open: true
+    command: /bin/bash

@@ -1,0 +1,28 @@
+FROM archlinux:latest
+
+# Update system and install dependencies
+RUN pacman -Syu --noconfirm && \
+    pacman -S --noconfirm base-devel git python python-pip sudo
+
+# Create a build user (makepkg cannot run as root)
+RUN useradd -m -G wheel builduser && \
+    echo 'builduser ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+
+# Set working directory
+WORKDIR /workspace
+
+# Copy project files
+COPY . /workspace/
+
+# Change ownership to build user
+RUN chown -R builduser:builduser /workspace
+
+# Switch to build user
+USER builduser
+
+# Set environment variables
+ENV PYTHONPATH=/workspace
+ENV PATH="/home/builduser/.local/bin:${PATH}"
+
+# Default command
+CMD ["/bin/bash"]

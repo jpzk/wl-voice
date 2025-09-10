@@ -1,4 +1,4 @@
-# Maintainer: Your Name <your.email@example.com>
+# Maintainer: Jendrik <jendrik@madewithtea.com>
 pkgname=wl-voice
 pkgver=1.0.0
 pkgrel=1

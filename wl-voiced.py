@@ -57,8 +57,19 @@ if __name__ == '__main__':
 
     # Create Unix socket
     socket_path = '/tmp/wl-voice.sock'
+    
+    # Check if daemon is already running
     if os.path.exists(socket_path):
-        os.unlink(socket_path)
+        try:
+            # Try to connect to existing socket
+            test_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            test_socket.connect(socket_path)
+            test_socket.close()
+            print("Error: wl-voiced is already running")
+            exit(1)
+        except (ConnectionRefusedError, FileNotFoundError):
+            # Socket file exists but no daemon is listening, clean it up
+            os.unlink(socket_path)
 
     server_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     server_socket.bind(socket_path)
